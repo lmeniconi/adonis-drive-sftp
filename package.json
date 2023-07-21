@@ -1,0 +1,144 @@
+{
+  "name": "@lmeniconi/adonis-drive-sftp",
+  "version": "0.0.1",
+  "description": "SFTP driver for AdonisJS drive",
+  "main": "build/providers/SftpProvider.js",
+  "files": [
+    "build/adonis-typings",
+    "build/instructions.md",
+    "build/src",
+    "build/providers"
+  ],
+  "types": "build/adonis-typings/index.d.ts",
+  "scripts": {
+    "mrm": "mrm --preset=@adonisjs/mrm-preset",
+    "pretest": "npm run lint",
+    "test": "node .bin/test.js",
+    "clean": "del build",
+    "compile": "npm run lint && npm run clean && tsc && copyfiles instructions.md build",
+    "build": "npm run compile",
+    "prepublishOnly": "npm run build",
+    "lint": "eslint . --ext=.ts",
+    "format": "prettier --write .",
+    "commit": "git-cz",
+    "release": "np --message=\"chore(release): %s\"",
+    "version": "npm run build",
+    "sync-labels": "github-label-sync --labels ./node_modules/@adonisjs/mrm-preset/gh-labels.json adonisjs/drive-gcs"
+  },
+  "keywords": [
+    "adonisjs",
+    "adonisjs-drive",
+    "adonis-drive",
+    "sftp"
+  ],
+  "author": "lmeniconi",
+  "license": "MIT",
+  "devDependencies": {
+    "@adonisjs/core": "^5.8.7",
+    "@adonisjs/mrm-preset": "^5.0.3",
+    "@adonisjs/require-ts": "^2.0.13",
+    "@poppinss/dev-utils": "^2.0.3",
+    "@types/node": "^18.8.3",
+    "@types/ssh2": "^1.11.13",
+    "@types/ssh2-sftp-client": "^9.0.0",
+    "commitizen": "^4.2.5",
+    "copyfiles": "^2.4.1",
+    "cz-conventional-changelog": "^3.3.0",
+    "del-cli": "^5.0.0",
+    "dotenv": "^16.0.3",
+    "eslint": "^8.24.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-adonis": "^2.1.1",
+    "eslint-plugin-prettier": "^4.2.1",
+    "github-label-sync": "^2.2.0",
+    "got": "^11.8.2",
+    "husky": "^8.0.1",
+    "japa": "^4.0.0",
+    "mrm": "^4.1.6",
+    "np": "^7.6.2",
+    "prettier": "^2.7.1",
+    "reflect-metadata": "^0.1.13",
+    "supertest": "^6.3.0",
+    "typescript": "^4.8.4"
+  },
+  "config": {
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    }
+  },
+  "np": {
+    "contents": ".",
+    "anyBranch": false
+  },
+  "peerDependencies": {
+    "@adonisjs/core": "^5.0.0"
+  },
+  "adonisjs": {
+    "instructionsMd": "./build/instructions.md",
+    "env": {
+      "SFTP_HOST": "host",
+      "SFTP_PORT": "port",
+      "SFTP_USERNAME": "username",
+      "SFTP_PASSWORD": "password"
+    },
+    "types": "@lmeniconi/adonis-drive-sftp",
+    "providers": [
+      "@lmeniconi/adonis-drive-sftp"
+    ]
+  },
+  "dependencies": {
+    "@poppinss/utils": "^5.0.0",
+    "ssh2-sftp-client": "^9.1.0"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lmeniconi/adonis-drive-sftp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/lmeniconi/adonis-drive-sftp/issues"
+  },
+  "homepage": "https://github.com/lmeniconi/adonis-drive-sftp#readme",
+  "publishConfig": {
+    "access": "public",
+    "tag": "latest"
+  },
+  "mrmConfig": {
+    "core": true,
+    "license": "MIT",
+    "services": [
+      "github-actions"
+    ],
+    "minNodeVersion": "14.17.0",
+    "probotApps": [
+      "stale",
+      "lock"
+    ],
+    "runGhActionsOnWindows": true
+  },
+  "eslintConfig": {
+    "extends": [
+      "plugin:adonis/typescriptPackage",
+      "prettier"
+    ],
+    "plugins": [
+      "prettier"
+    ],
+    "rules": {
+      "prettier/prettier": [
+        "error",
+        {
+          "endOfLine": "auto"
+        }
+      ]
+    }
+  },
+  "eslintIgnore": [
+    "build"
+  ],
+  "prettier": {
+    "semi": false
+  }
+}
