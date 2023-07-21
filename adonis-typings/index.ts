@@ -31,7 +31,7 @@ declare module "@ioc:Adonis/Core/Drive" {
   }
 
   interface DriversList {
-    ftp: {
+    sftp: {
       implementation: SftpDriverContract
       config: SftpDriverConfig
     }
