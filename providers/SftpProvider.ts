@@ -1,5 +1,5 @@
 /*
- * @adonisjs/drive-gcs
+ * @lmeniconi/adonis-drive-sftp
  *
  * (c) Luciano Meniconi <luciano.meniconi.r@gmail.com>
  *

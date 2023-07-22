@@ -1,5 +1,5 @@
 /*
- * @adonisjs/drive-gcs
+ * @lmeniconi/adonis-drive-sftp
  *
  * (c) Luciano Meniconi <luciano.meniconi.r@gmail.com>
  *
@@ -9,14 +9,18 @@
 
 declare module "@ioc:Adonis/Core/Drive" {
   import { default as SftpClient, ConnectOptions } from "ssh2-sftp-client"
-  import { ConnectConfig } from "ssh2"
-  export type SftpConnectionOptions = ConnectOptions & ConnectConfig
+  // import { ConnectConfig } from "ssh2"
+  // type SftpConnectionOptions = ConnectOptions & ConnectConfig
 
   /**
    * Configuration accepted by the sftp driver
    */
-  export type SftpDriverConfig = SftpConnectionOptions & {
+  export type SftpDriverConfig = {
     driver: "sftp"
+    host?: string
+    port?: number
+    username?: string
+    password?: string
   }
 
   /**
