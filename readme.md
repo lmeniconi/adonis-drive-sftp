@@ -1,4 +1,22 @@
-The package has been configured successfully!
+# Configuring SFTP driver
+
+## Extend types
+
+Open `tsconfig.json` file and add the following code snippet inside the `compilerOptions.types` array.
+
+```json
+{
+  "compilerOptions": {
+    // ... other options
+
+    "types": [
+        // ... other types
+        
+        "@lmeniconi/adonis-drive-sftp",
+      ]
+  }
+}
+```
 
 ## Validating environment variables
 
@@ -7,9 +25,9 @@ The configuration for SFTP relies on certain environment variables and it is usu
 Open `env.ts` file and paste the following code inside it.
 
 ```ts
-SFTP_HOST: Env.schema.string()
-SFTP_PORT: Env.schema.number()
-SFTP_USERNAME: Env.schema.string()
+SFTP_HOST: Env.schema.string(),
+SFTP_PORT: Env.schema.number(),
+SFTP_USERNAME: Env.schema.string(),
 SFTP_PASSWORD: Env.schema.string()
 ```
 
@@ -31,3 +49,12 @@ Open the `config/drive.ts` and paste the following code snippet inside it.
   }
 }
 ```
+
+---
+
+# Usage
+Example of use in a controller
+
+```ts
+```
+

@@ -7,10 +7,9 @@
  * file that was distributed with this source code.
  */
 
-import { default as SftpClient, ConnectOptions } from "ssh2-sftp-client"
-import { ConnectConfig } from "ssh2"
-
 declare module "@ioc:Adonis/Core/Drive" {
+  import { default as SftpClient, ConnectOptions } from "ssh2-sftp-client"
+  import { ConnectConfig } from "ssh2"
   export type SftpConnectionOptions = ConnectOptions & ConnectConfig
 
   /**
