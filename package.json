@@ -1,6 +1,6 @@
 {
   "name": "@lmeniconi/adonis-drive-sftp",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "SFTP storage driver for AdonisJS drive",
   "main": "build/providers/SftpProvider.js",
   "files": [
