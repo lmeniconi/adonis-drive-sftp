@@ -8,19 +8,17 @@
  */
 
 declare module "@ioc:Adonis/Core/Drive" {
-  import { default as SftpClient, ConnectOptions } from "ssh2-sftp-client"
-  // import { ConnectConfig } from "ssh2"
-  // type SftpConnectionOptions = ConnectOptions & ConnectConfig
+  import { default as SftpClient } from "ssh2-sftp-client"
 
   /**
    * Configuration accepted by the sftp driver
    */
   export type SftpDriverConfig = {
     driver: "sftp"
-    host?: string
-    port?: number
-    username?: string
-    password?: string
+    host: string
+    port: number
+    username: string
+    password: string
   }
 
   /**
