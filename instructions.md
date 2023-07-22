@@ -1,21 +1,4 @@
-Configuring SFTP driver
-
-## Extend types
-Open `tsconfig.json` file and add the following code snippet inside the `compilerOptions.types` array.
-
-```json
-{
-  "compilerOptions": {
-    // ... other options
-
-    "types": [
-        // ... other types
-        
-        "@lmeniconi/adonis-drive-sftp",
-      ]
-  }
-}
-```
+Configure SFTP driver
 
 ## Validating environment variables
 The configuration for SFTP relies on certain environment variables and it is usually a good practice to validate the presence of those environment variables.
