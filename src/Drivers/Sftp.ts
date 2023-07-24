@@ -15,14 +15,18 @@ import {
   CannotDeleteFileException,
   CannotGetMetaDataException,
   CannotSetVisibilityException,
+  CannotListDirectoryException,
 } from "@adonisjs/core/build/standalone"
 
 import {
+  DirectoryListingContract,
   DriveFileStats,
+  DriveListItem,
   SftpDriverConfig,
   SftpDriverContract,
   Visibility,
 } from "@ioc:Adonis/Core/Drive"
+import sftp from "ssh2-sftp-client"
 
 import SftpClient from "ssh2-sftp-client"
 
@@ -164,6 +168,27 @@ export class SftpDriver implements SftpDriverContract {
         destination,
         error.original || error
       )
+    }
+  }
+
+  public list(
+    location: string
+  ): DirectoryListingContract<this, DriveListItem<sftp.FileInfo>> {
+    // @ts-ignore
+    return {
+      driver: this,
+      toArray: async () => {
+        try {
+          const directory = await this.adapter.list(location)
+          return directory.map((file) => ({
+            isFile: file.type !== "d",
+            location: `${location}/${file.name}`,
+            original: file,
+          }))
+        } catch (error) {
+          throw CannotListDirectoryException.invoke(location, error)
+        }
+      },
     }
   }
 

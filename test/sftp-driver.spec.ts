@@ -12,7 +12,11 @@ import test from "japa"
 import { string } from "@poppinss/utils/build/helpers"
 
 import { SftpDriver } from "../src/Drivers/Sftp"
-import { authenticationOptions, stringToBuffer } from "../test-helpers"
+import {
+  SFTP_ROOT_DIRECTORY,
+  authenticationOptions,
+  stringToBuffer,
+} from "../test-helpers"
 
 test.group("SFTP driver | put", () => {
   test("write file to the destination", async (assert) => {
@@ -337,6 +341,30 @@ test.group("GCS driver | get", () => {
         'E_CANNOT_READ_FILE: Cannot read file from location "foo.txt"'
       )
     }
+
+    await driver.disconnect()
+  }).timeout(0)
+})
+
+test.group("GCS driver | list", () => {
+  test("list directory", async (assert) => {
+    const config = {
+      ...authenticationOptions,
+      driver: "sftp" as const,
+    }
+    const driver = new SftpDriver(config)
+    await driver.connect()
+
+    const fileName = `${string.generateRandom(10)}.txt`
+    const data = stringToBuffer("hello world")
+    await driver.put(fileName, data)
+
+    const list = driver.list(SFTP_ROOT_DIRECTORY)
+    const directory = await list.toArray()
+
+    assert.isTrue(directory.some((item) => item.original.name === fileName))
+
+    await driver.delete(fileName)
 
     await driver.disconnect()
   }).timeout(0)
