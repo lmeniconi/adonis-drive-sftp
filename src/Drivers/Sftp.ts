@@ -26,9 +26,19 @@ import {
   SftpDriverContract,
   Visibility,
 } from "@ioc:Adonis/Core/Drive"
-import sftp from "ssh2-sftp-client"
 
 import SftpClient from "ssh2-sftp-client"
+
+function connected(_, __, descriptor: PropertyDescriptor) {
+  const originalMethod = descriptor.value
+
+  descriptor.value = async function (...args: any[]) {
+    await this.ensureConnection()
+    return await originalMethod.apply(this, args)
+  }
+
+  return descriptor
+}
 
 export class SftpDriver implements SftpDriverContract {
   /**
@@ -48,7 +58,7 @@ export class SftpDriver implements SftpDriverContract {
   /**
    * Connect to the sftp server
    */
-  public async connect(): Promise<void> {
+  private async connect(): Promise<void> {
     await this.adapter.connect({
       host: this.config.host,
       port: this.config.port,
@@ -58,17 +68,51 @@ export class SftpDriver implements SftpDriverContract {
   }
 
   /**
+   * Check if we are connected to the sftp server.
+   * Returns `true` when connected and `false` otherwise.
+   */
+  private async checkConnection(): Promise<boolean> {
+    // @ts-ignore
+    if (!this.adapter.sftp) return false
+
+    try {
+      await this.adapter.cwd()
+    } catch {
+      return false
+    }
+
+    return true
+  }
+
+  /**
+   * Ensure that we are connected to the sftp server
+   */
+  private async ensureConnection(): Promise<void> {
+    const isConnected = await this.checkConnection()
+    if (!isConnected) await this.connect()
+  }
+
+  /**
+   * Converts a string to a buffer
+   */
+  private stringToBuffer(value: string): Buffer {
+    return Buffer.from(value)
+  }
+
+  /**
    * Disconnect from the sftp server
    */
-  public async disconnect(): Promise<void> {
-    await this.adapter.end()
-  }
+  // private async disconnect(): Promise<void> {
+  //   await this.adapter.end()
+  //   this.adapter.stat
+  // }
 
   /**
    * Returns the file contents as a buffer. The buffer return
    * value allows you to self choose the encoding when
    * converting the buffer to a string.
    */
+  @connected
   public async get(location: string): Promise<Buffer> {
     let contents: Buffer
     try {
@@ -83,6 +127,7 @@ export class SftpDriver implements SftpDriverContract {
   /**
    * A boolean to find if the location path exists or not
    */
+  @connected
   public async exists(location: string): Promise<boolean> {
     let exists: boolean
     try {
@@ -97,6 +142,7 @@ export class SftpDriver implements SftpDriverContract {
   /**
    * Returns the file stats
    */
+  @connected
   public async getStats(location: string): Promise<DriveFileStats> {
     let metaData
     try {
@@ -116,9 +162,13 @@ export class SftpDriver implements SftpDriverContract {
    * Write buffer contents to a destination.
    * if contents is a string, gonna search for the file in the local filesystem
    */
+  @connected
   public async put(location: string, contents: Buffer | string): Promise<void> {
     try {
-      await this.adapter.put(contents, location)
+      const data =
+        typeof contents === "string" ? this.stringToBuffer(contents) : contents
+
+      await this.adapter.put(data, location)
     } catch (error) {
       console.error(error)
       throw CannotWriteFileException.invoke(location, error)
@@ -128,6 +178,7 @@ export class SftpDriver implements SftpDriverContract {
   /**
    * Remove a given location path
    */
+  @connected
   public async delete(location: string): Promise<void> {
     try {
       const exists = await this.exists(location)
@@ -143,6 +194,7 @@ export class SftpDriver implements SftpDriverContract {
    * Copy a given location path from the source to the desination.
    * The missing intermediate directories will be created (if required)
    */
+  @connected
   public async copy(source: string, destination: string): Promise<void> {
     try {
       const exists = await this.adapter.exists(destination)
@@ -158,6 +210,7 @@ export class SftpDriver implements SftpDriverContract {
    * Move a given location path from the source to the desination.
    * The missing intermediate directories will be created (if required)
    */
+  @connected
   public async move(source: string, destination: string): Promise<void> {
     try {
       await this.copy(source, destination)
@@ -171,14 +224,20 @@ export class SftpDriver implements SftpDriverContract {
     }
   }
 
+  /**
+   * List all files inside a directory.
+   * The function toArray must be called on the return value to fetch
+   */
   public list(
     location: string
-  ): DirectoryListingContract<this, DriveListItem<sftp.FileInfo>> {
+  ): DirectoryListingContract<this, DriveListItem<SftpClient.FileInfo>> {
     // @ts-ignore
     return {
       driver: this,
       toArray: async () => {
         try {
+          await this.ensureConnection()
+
           const directory = await this.adapter.list(location)
           return directory.map((file) => ({
             isFile: file.type !== "d",

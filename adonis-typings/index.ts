@@ -27,8 +27,6 @@ declare module "@ioc:Adonis/Core/Drive" {
   export interface SftpDriverContract extends DriverContract {
     name: "sftp"
     adapter: SftpClient
-    connect(): Promise<void>
-    disconnect(): Promise<void>
   }
 
   interface DriversList {

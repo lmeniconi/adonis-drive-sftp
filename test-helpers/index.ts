@@ -27,8 +27,8 @@ export const authenticationOptions = {
   password: SFTP_PASSWORD,
 }
 
-export function stringToBuffer(value: string): Buffer {
-  return Buffer.from(value)
+export function getFileName(fileName: string) {
+  return `${SFTP_ROOT_DIRECTORY}/${fileName}`
 }
 
 export const fs = new Filesystem(join(__dirname, "__app"))

@@ -15,7 +15,7 @@ import { SftpDriver } from "../src/Drivers/Sftp"
 import {
   SFTP_ROOT_DIRECTORY,
   authenticationOptions,
-  stringToBuffer,
+  getFileName,
 } from "../test-helpers"
 
 test.group("SFTP driver | put", () => {
@@ -24,19 +24,15 @@ test.group("SFTP driver | put", () => {
       ...authenticationOptions,
       driver: "sftp" as const,
     }
-    const fileName = `${string.generateRandom(10)}.txt`
-    const data = stringToBuffer("hello world")
-
     const driver = new SftpDriver(config)
-    await driver.connect()
 
-    await driver.put(fileName, data)
+    const fileName = getFileName(`${string.generateRandom(10)}.txt`)
+    await driver.put(fileName, "hello world")
 
     const contents = await driver.get(fileName)
     assert.equal(contents.toString(), "hello world")
 
     await driver.delete(fileName)
-    await driver.disconnect()
   }).timeout(0)
 
   test("overwrite destination when already exists", async (assert) => {
@@ -44,21 +40,17 @@ test.group("SFTP driver | put", () => {
       ...authenticationOptions,
       driver: "sftp" as const,
     }
-    const fileName = `${string.generateRandom(10)}.txt`
-    const data = stringToBuffer("hello world")
-    const data2 = stringToBuffer("hi world")
-
     const driver = new SftpDriver(config)
-    await driver.connect()
 
-    await driver.put(fileName, data)
-    await driver.put(fileName, data2)
+    const fileName = getFileName(`${string.generateRandom(10)}.txt`)
+
+    await driver.put(fileName, "hello world")
+    await driver.put(fileName, "hi world")
 
     const contents = await driver.get(fileName)
     assert.equal(contents.toString(), "hi world")
 
     await driver.delete(fileName)
-    await driver.disconnect()
   }).timeout(0)
 })
 
@@ -68,17 +60,14 @@ test.group("SFTP driver | exists", () => {
       ...authenticationOptions,
       driver: "sftp" as const,
     }
-    const fileName = `${string.generateRandom(10)}.txt`
-    const data = stringToBuffer("hello world")
-
     const driver = new SftpDriver(config)
-    await driver.connect()
 
-    await driver.put(fileName, data)
+    const fileName = getFileName(`${string.generateRandom(10)}.txt`)
+
+    await driver.put(fileName, "hello world")
     assert.isTrue(await driver.exists(fileName))
 
     await driver.delete(fileName)
-    await driver.disconnect()
   }).timeout(0)
 
   test("return false when a file doesn't exists", async (assert) => {
@@ -86,14 +75,10 @@ test.group("SFTP driver | exists", () => {
       ...authenticationOptions,
       driver: "sftp" as const,
     }
-    const fileName = `${string.generateRandom(10)}.txt`
-
     const driver = new SftpDriver(config)
-    await driver.connect()
 
+    const fileName = getFileName(`${string.generateRandom(10)}.txt`)
     assert.isFalse(await driver.exists(fileName))
-
-    await driver.disconnect()
   }).timeout(0)
 })
 
@@ -103,18 +88,14 @@ test.group("SFTP driver | delete", () => {
       ...authenticationOptions,
       driver: "sftp" as const,
     }
-    const fileName = `${string.generateRandom(10)}.txt`
-    const data = stringToBuffer("bar")
-
     const driver = new SftpDriver(config)
-    await driver.connect()
 
-    await driver.put(fileName, data)
+    const fileName = getFileName(`${string.generateRandom(10)}.txt`)
+
+    await driver.put(fileName, "bar")
     await driver.delete(fileName)
 
     assert.isFalse(await driver.exists(fileName))
-
-    await driver.disconnect()
   }).timeout(0)
 
   test("do not error when trying to remove a non-existing file", async (assert) => {
@@ -122,15 +103,12 @@ test.group("SFTP driver | delete", () => {
       ...authenticationOptions,
       driver: "sftp" as const,
     }
-    const fileName = `${string.generateRandom(10)}.txt`
+    const fileName = getFileName(`${string.generateRandom(10)}.txt`)
 
     const driver = new SftpDriver(config)
-    await driver.connect()
 
     await driver.delete(fileName)
     assert.isFalse(await driver.exists(fileName))
-
-    await driver.disconnect()
   }).timeout(0)
 
   test("do not error when file parent directory doesn't exists", async (assert) => {
@@ -138,15 +116,12 @@ test.group("SFTP driver | delete", () => {
       ...authenticationOptions,
       driver: "sftp" as const,
     }
-    const fileName = `bar/baz/${string.generateRandom(10)}.txt`
-
     const driver = new SftpDriver(config)
-    await driver.connect()
+
+    const fileName = getFileName(`bar/baz/${string.generateRandom(10)}.txt`)
 
     await driver.delete(fileName)
     assert.isFalse(await driver.exists(fileName))
-
-    await driver.disconnect()
   }).timeout(0)
 })
 
@@ -156,14 +131,12 @@ test.group("SFTP driver | copy", () => {
       ...authenticationOptions,
       driver: "sftp" as const,
     }
-    const fileName = `${string.generateRandom(10)}.txt`
-    const fileName2 = `${string.generateRandom(10)}.txt`
-    const data = stringToBuffer("hello world")
-
     const driver = new SftpDriver(config)
-    await driver.connect()
 
-    await driver.put(fileName, data)
+    const fileName = getFileName(`${string.generateRandom(10)}.txt`)
+    const fileName2 = getFileName(`${string.generateRandom(10)}.txt`)
+
+    await driver.put(fileName, "hello world")
     await driver.copy(fileName, fileName2)
 
     const contents = await driver.get(fileName2)
@@ -171,8 +144,6 @@ test.group("SFTP driver | copy", () => {
 
     await driver.delete(fileName)
     await driver.delete(fileName2)
-
-    await driver.disconnect()
   }).timeout(0)
 
   test("return error when source doesn't exists", async (assert) => {
@@ -184,7 +155,6 @@ test.group("SFTP driver | copy", () => {
     }
 
     const driver = new SftpDriver(config)
-    await driver.connect()
 
     try {
       await driver.copy("foo.txt", "bar.txt")
@@ -194,8 +164,6 @@ test.group("SFTP driver | copy", () => {
         'E_CANNOT_COPY_FILE: Cannot copy file from "foo.txt" to "bar.txt"'
       )
     }
-
-    await driver.disconnect()
   }).timeout(0)
 
   test("overwrite destination when already exists", async (assert) => {
@@ -203,16 +171,13 @@ test.group("SFTP driver | copy", () => {
       ...authenticationOptions,
       driver: "sftp" as const,
     }
-    const fileName = `${string.generateRandom(10)}.txt`
-    const fileName2 = `${string.generateRandom(10)}.txt`
-    const data = stringToBuffer("hello world")
-    const data2 = stringToBuffer("hi world")
-
     const driver = new SftpDriver(config)
-    await driver.connect()
 
-    await driver.put(fileName, data)
-    await driver.put(fileName2, data2)
+    const fileName = getFileName(`${string.generateRandom(10)}.txt`)
+    const fileName2 = getFileName(`${string.generateRandom(10)}.txt`)
+
+    await driver.put(fileName, "hello world")
+    await driver.put(fileName2, "hi world")
     await driver.copy(fileName, fileName2)
 
     const contents = await driver.get(fileName2)
@@ -220,8 +185,6 @@ test.group("SFTP driver | copy", () => {
 
     await driver.delete(fileName)
     await driver.delete(fileName2)
-
-    await driver.disconnect()
   }).timeout(0)
 })
 
@@ -231,23 +194,19 @@ test.group("SFTP driver | move", () => {
       ...authenticationOptions,
       driver: "sftp" as const,
     }
-    const fileName = `${string.generateRandom(10)}.txt`
-    const fileName1 = `${string.generateRandom(10)}.txt`
-    const data = stringToBuffer("hello world")
-
     const driver = new SftpDriver(config)
-    await driver.connect()
 
-    await driver.put(fileName, data)
-    await driver.move(fileName, fileName1)
+    const fileName = getFileName(`${string.generateRandom(10)}.txt`)
+    const fileName2 = getFileName(`${string.generateRandom(10)}.txt`)
 
-    const contents = await driver.get(fileName1)
+    await driver.put(fileName, "hello world")
+    await driver.move(fileName, fileName2)
+
+    const contents = await driver.get(fileName2)
     assert.equal(contents.toString(), "hello world")
     assert.isFalse(await driver.exists(fileName))
 
-    await driver.delete(fileName1)
-
-    await driver.disconnect()
+    await driver.delete(fileName2)
   }).timeout(0)
 
   test("return error when source doesn't exists", async (assert) => {
@@ -258,9 +217,7 @@ test.group("SFTP driver | move", () => {
 
       driver: "sftp" as const,
     }
-
     const driver = new SftpDriver(config)
-    await driver.connect()
 
     try {
       await driver.move("foo.txt", "baz/bar.txt")
@@ -270,8 +227,6 @@ test.group("SFTP driver | move", () => {
         'E_CANNOT_MOVE_FILE: Cannot move file from "foo.txt" to "baz/bar.txt"'
       )
     }
-
-    await driver.disconnect()
   }).timeout(0)
 
   test("overwrite destination when already exists", async (assert) => {
@@ -279,16 +234,13 @@ test.group("SFTP driver | move", () => {
       ...authenticationOptions,
       driver: "sftp" as const,
     }
-    const fileName = `${string.generateRandom(10)}.txt`
-    const fileName1 = `${string.generateRandom(10)}.txt`
-    const data = stringToBuffer("hello world")
-    const data2 = stringToBuffer("hi world")
-
     const driver = new SftpDriver(config)
-    await driver.connect()
 
-    await driver.put(fileName, data)
-    await driver.put(fileName1, data2)
+    const fileName = getFileName(`${string.generateRandom(10)}.txt`)
+    const fileName1 = getFileName(`${string.generateRandom(10)}.txt`)
+
+    await driver.put(fileName, "hello world")
+    await driver.put(fileName1, "hi world")
 
     await driver.move(fileName, fileName1)
 
@@ -296,8 +248,6 @@ test.group("SFTP driver | move", () => {
     assert.equal(contents.toString(), "hello world")
 
     await driver.delete(fileName1)
-
-    await driver.disconnect()
   }).timeout(0)
 })
 
@@ -307,31 +257,25 @@ test.group("GCS driver | get", () => {
       ...authenticationOptions,
       driver: "sftp" as const,
     }
-    const fileName = `${string.generateRandom(10)}.txt`
-    const data = stringToBuffer("hello world")
-
     const driver = new SftpDriver(config)
-    await driver.connect()
 
-    await driver.put(fileName, data)
+    const fileName = getFileName(`${string.generateRandom(10)}.txt`)
+    await driver.put(fileName, "hello world")
 
     const contents = await driver.get(fileName)
     assert.equal(contents.toString(), "hello world")
 
     await driver.delete(fileName)
-
-    await driver.disconnect()
   }).timeout(0)
 
   test("return error when file doesn't exists", async (assert) => {
     assert.plan(1)
+
     const config = {
       ...authenticationOptions,
       driver: "sftp" as const,
     }
-
     const driver = new SftpDriver(config)
-    await driver.connect()
 
     try {
       await driver.get("foo.txt")
@@ -341,8 +285,6 @@ test.group("GCS driver | get", () => {
         'E_CANNOT_READ_FILE: Cannot read file from location "foo.txt"'
       )
     }
-
-    await driver.disconnect()
   }).timeout(0)
 })
 
@@ -353,20 +295,17 @@ test.group("GCS driver | list", () => {
       driver: "sftp" as const,
     }
     const driver = new SftpDriver(config)
-    await driver.connect()
 
     const fileName = `${string.generateRandom(10)}.txt`
-    const data = stringToBuffer("hello world")
-    await driver.put(fileName, data)
+    const fullFileName = getFileName(fileName)
+    await driver.put(fullFileName, "hello world, list function")
 
     const list = driver.list(SFTP_ROOT_DIRECTORY)
     const directory = await list.toArray()
 
     assert.isTrue(directory.some((item) => item.original.name === fileName))
 
-    await driver.delete(fileName)
-
-    await driver.disconnect()
+    await driver.delete(fullFileName)
   }).timeout(0)
 })
 
@@ -376,21 +315,16 @@ test.group("GCS driver | getStats", () => {
       ...authenticationOptions,
       driver: "sftp" as const,
     }
-    const fileName = `${string.generateRandom(10)}.txt`
-    const data = stringToBuffer("hello world")
-
     const driver = new SftpDriver(config)
-    await driver.connect()
 
-    await driver.put(fileName, data)
+    const fileName = getFileName(`${string.generateRandom(10)}.txt`)
+    await driver.put(fileName, "hello world")
 
     const stats = await driver.getStats(fileName)
     assert.equal(stats.size, 11)
     assert.instanceOf(stats.modified, Date)
 
     await driver.delete(fileName)
-
-    await driver.disconnect()
   }).timeout(0)
 
   test("return error when file is missing", async (assert) => {
@@ -400,9 +334,7 @@ test.group("GCS driver | getStats", () => {
       ...authenticationOptions,
       driver: "sftp" as const,
     }
-
     const driver = new SftpDriver(config)
-    await driver.connect()
 
     const fileName = `${string.generateRandom(10)}.txt`
 
@@ -414,7 +346,5 @@ test.group("GCS driver | getStats", () => {
         `E_CANNOT_GET_METADATA: Unable to retrieve the "stats" for file at location "${fileName}"`
       )
     }
-
-    await driver.disconnect()
   }).timeout(0)
 })
