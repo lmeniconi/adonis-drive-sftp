@@ -11,10 +11,7 @@ Example of use in a controller
 
 ```ts
   const fileName = 'example.txt'
-  const data = Buffer.from('hello world')
 
   const sftp = Drive.use('sftp')
-  await sftp.connect()
-  await sftp.put(fileName, data)
-  await sftp.disconnect()
+  await sftp.put(fileName, "hello world")
 ```
