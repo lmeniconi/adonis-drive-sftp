@@ -71,24 +71,16 @@ export class SftpDriver implements SftpDriverContract {
    * Check if we are connected to the sftp server.
    * Returns `true` when connected and `false` otherwise.
    */
-  private async checkConnection(): Promise<boolean> {
+  private async isConnected(): Promise<boolean> {
     // @ts-ignore
-    if (!this.adapter.sftp) return false
-
-    try {
-      await this.adapter.cwd()
-    } catch {
-      return false
-    }
-
-    return true
+    return Boolean(this.adapter.sftp)
   }
 
   /**
    * Ensure that we are connected to the sftp server
    */
   private async ensureConnection(): Promise<void> {
-    const isConnected = await this.checkConnection()
+    const isConnected = await this.isConnected()
     if (!isConnected) await this.connect()
   }
 
