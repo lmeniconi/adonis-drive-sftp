@@ -73,7 +73,15 @@ export class SftpDriver implements SftpDriverContract {
    */
   private async isConnected(): Promise<boolean> {
     // @ts-ignore
-    return Boolean(this.adapter.sftp)
+    if (!this.adapter.sftp) return false
+
+    try {
+      await this.adapter.cwd()
+    } catch {
+      return false
+    }
+
+    return true
   }
 
   /**
